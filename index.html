@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <title>Mercearia Tendi Tudo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+        function createProduct() {
+            $.ajax( {
+                url : "https://banco-dados-teste.glitch.me/api/produtos",
+                method : "post",
+                data : {
+                    title : $("input[id=title]").val(),
+                    price : $("input[id=price]").val(),
+                    description : $("textarea[id=description]").val()
+                },
+                success : function(product) {
+                    alert("Produto cadastrado com sucesso.");
+                    createTableLine(product);
+                    $("input[id=title]").val("");
+                    $("input[id=price]").val("");
+                    $("textarea[id=description]").val("");
+                },
+                error : function(a, b, c) {
+                    alert("Não foi possível cadastrar o produto.");
+                }
+            });
+        }
+
+        function updateProduct() {
+            let idProduct = $("form").eq(1).attr("id");
+            let urlId = "https://banco-dados-teste.glitch.me/api/produtos/" + idProduct;
+            $.ajax( {
+                url : urlId,
+                method : "put",
+                data : {
+                    title : $("input[id=titleUpdate]").val(),
+                    price : $("input[id=priceUpdate]").val(),
+                    description : $("textarea[id=descriptionUpdate]").val()
+                },
+                success : function(product) {
+                    alert("Produto alterado com sucesso.");
+                    $("input[id=titleUpdate]").val("");
+                    $("input[id=priceUpdate]").val("");
+                    $("textarea[id=descriptionUpdate]").val("");
+                    $("body > div > div:nth-child(2) > div:nth-child(3)").css("opacity", "0%");
+                    $("tbody").empty();
+                    readAll();
+                },
+                error : function(a, b, c) {
+                    alert("Erro na alteração do produto selecionado.")
+                }
+            });
+        }
+
+        function readOne(trProduct) {
+            let idProduct = trProduct.attr("id");
+            let urlId = "https://banco-dados-teste.glitch.me/api/produtos/" + idProduct;
+            $.ajax( {
+                url : urlId,
+                method : "get",
+                success : function(product) {
+                    $("body > div > div:nth-child(2) > div:nth-child(3)").css("opacity", "100%");
+                    $("input[id=titleUpdate]").val(product.title);
+                    $("input[id=priceUpdate]").val(product.price);
+                    $("textarea[id=descriptionUpdate]").val(product.description);
+                    $("form").eq(1).attr("id", product._id);
+                },
+                error : function(a, b, c) {
+                    alert("Erro na leitura do produto selecionado.");
+                }  
+            });
+        }
+
+        function deleteProduct(trProduct) {
+            let idProduct = trProduct.attr("id");
+            let urlId = "https://banco-dados-teste.glitch.me/api/produtos/" + idProduct;
+            $.ajax( {
+                url : urlId,
+                method : "delete",
+                success : function(product) {                    
+                    alert("Produto removido.");
+                    $(trProduct).remove();
+                },
+                error : function(a, b, c) {
+                    alert("Erro na remoção do produto selecionado.");
+                }
+            });
+        }
+
+        function readAll() {
+            $.ajax( {
+                url : "https://banco-dados-teste.glitch.me/api/produtos",
+                method : "get",
+                success : function(dataReceived) {
+                        for(product of dataReceived) {
+                            createTableLine(product);
+                        }
+                },
+                error : function(a, b, c) {
+                    console.log("Erro na leitura das amostras.");
+                }
+            });            
+        }
+
+        function createTableLine(product) {
+            let tr = $("<tr>");
+            tr.append($("<td>").text(product.title));
+            tr.append($("<td>").text(product.price));
+            tr.append($("<button>").text("Deletar").attr("class", "btn btn-danger"))
+                .append($("<button>").text("Exibir").attr("class", "btn btn-info"));                
+            // tr.append($("<button>").text("Deletar").attr("class", "btn btn-danger").css("margin-top", "3%").css("margin-right", "3%"))
+            //     .append($("<button>").text("Exibir").attr("class", "btn btn-info").css("margin-top", "3%").css("margin-right", "3%"));
+            let td = $("<td>");
+            tr.attr("id", product._id);
+            tr.append(td);
+            $("tbody").append(tr);
+        }
+
+        function treatButton(buttons) {
+            let buttonContent = buttons.text();
+            let trProduct = buttons.parent();
+            switch (buttonContent) {
+                case "Cadastrar":
+                    createProduct();
+                    break;
+                case "Deletar":
+                    deleteProduct(trProduct);
+                    break;
+                case "Editar":
+                    updateProduct();
+                    break;
+                case "Exibir":
+                    readOne(trProduct);
+                    break;
+            }
+        }
+    
+        $(document).ready(function() {
+            $("body > div > div:nth-child(2) > div:nth-child(3)").css("opacity", "0%");
+            readAll();
+            $(document).on("click", "button", function(e) {
+                treatButton($(this));                
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <!-- Cabeçalho -->
+        <div class="row">
+            <h1>Mercearia Tendi Tudo</h1>
+        </div>
+
+        <!-- Coluna esquerda (formulário cadastro) -->
+        <div class="row">
+            <div class="col">
+                <form>
+                    <fieldset>
+                        <p><label>Produto:  <input type="text" id="title" name="productName"></label></p>
+                        <p><label>Preço (R$): <input type="number" id="price" name="productPrice" min="0" step="0.01"></label></p>
+                        <p><label>Descrição do produto: <textarea rows="3" cols="40" id="description" name="productDescription"></textarea></label></p>
+                    </fieldset>
+                </form>
+                <button class="btn btn-success">Cadastrar</button>
+            </div>
+
+          <!-- Coluna central (tabela) -->
+          <div class="col">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Nome</th>
+                          <th>Preço (R$)</th>
+                          <th>Opções</th>
+                      </tr>
+                  </thead>
+
+                  <tbody></tbody>
+              </table>
+          </div>
+
+          <!-- Coluna direita (formulário de edição) -->
+          <div class="col">
+            <form>
+                <fieldset>
+                    <p><label>Produto:  <input type="text" id="titleUpdate" name="productNameUpdate"></label></p>
+                    <p><label>Preço (R$): <input type="number" id="priceUpdate" name="productPriceUpdate" min="0" step="0.01"></label></p>
+                    <p><label>Descrição do produto: <textarea rows="3" cols="40" id="descriptionUpdate" name="productDescriptionUpdate"></textarea></label></p>
+                </fieldset>
+            </form>
+            <button class="btn btn-warning">Editar</button>
+          </div>
+        </div>
+    </div>
+    <footer>
+        <p>Desenvolvido por João Mateus Marão Domingues | E-mail: joao.mateus@aluno.ifsp.edu.br</p>
+    </footer>
+</body>
+</html>

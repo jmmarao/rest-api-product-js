@@ -1,0 +1,42 @@
+h1{
+    text-align: center;
+    font-weight: bold;
+    border-bottom: solid black;
+    color: white;
+    background-color: rgb(120, 120, 120);
+}
+
+table{
+    margin-left: auto;
+    margin-right: auto;
+    border-top: solid black;
+    border-bottom: solid black;
+}
+
+thead>tr{
+    border-top: solid black;
+    border-bottom: solid black;
+    text-align: center;
+}
+
+tbody>tr
+{
+    border-bottom: thin solid gray;
+}
+
+tr:hover{
+    background-color: lightgrey;
+}
+
+td:nth-child(2), td:nth-child(3){
+    text-align: center;
+}
+
+footer{
+    margin-top: 1%;
+    text-align: right;
+    border-top: solid black;
+    color: white;
+    background-color: rgb(120, 120, 120);
+    /* font-family: 'Times New Roman', Times, serif; */
+}
